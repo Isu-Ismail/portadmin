@@ -27,3 +27,4 @@ overwrite it, do not create new files per session.
 
 If your edit changes a feature's behavior, architecture, or file layout, also update the relevant file in
 `.knowledge/` in the same turn.
+ 

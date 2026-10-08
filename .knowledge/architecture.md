@@ -17,13 +17,17 @@
 
 ## Data
 - Firestore: `about/main`, `projects/{id}`. Validation via Zod in `core/schemas`; `firestore.ts` parses on save.
-- Storage names are deterministic (see `core/firebase/storage.ts`): `about/resume_pdf.*`, `about/profile.*`,
-  `about/certificateN.*`, `about/experience_certificate_N.*`, `projects/{id}/{prefix}{N}.*`, `projects/{id}/certificate.*`.
-- `renumberProjectImages` rewrites files via temp names to avoid collisions.
+- About assets keep deterministic names (`about/resume_pdf.*`, `about/profile.*`, `about/certificateN.*`,
+  `about/experience_certificate_N.*`).
+- Project files (gallery images + certificate) are always named `projects/{id}/{slug}_{4 random A-Z0-9}.{ext}`
+  (`newProjectFileName`). Names are never reused or renamed: reorder only changes the `images` array order in
+  Firestore; replaced/removed files are queued (`ProjectForm.queueStorageDelete`) and deleted from Storage on save.
+- `scripts/migrate-image-names.mjs` (Admin SDK) one-time renames legacy `1.png`-style files and rewrites Firestore URLs.
 
 ## Image CORS
 Plain `fetch()` of Storage download URLs fails CORS on https origins. `core/utils/image.ts#fetchImageAsBlob`
 routes Firebase URLs through `getBlob` (SDK). Bucket CORS must still be configured (`cors.json`).
 
 ## Build and deploy
-`pnpm build` -> `dist/`. GitHub Actions publishes `dist/` to `gh-pages`.
+`pnpm build` -> `dist/` (committed to git). The workflow does no install/build: when a pushed commit message contains
+"deploy", it force-pushes `dist/` as an orphan commit to `gh-pages` (created if missing).

@@ -31,7 +31,7 @@
 <div class="flex min-h-screen items-center justify-center p-4">
   <form onsubmit={submit} class="w-full max-w-sm rounded-lg border border-line bg-surface p-6">
     <div class="mb-6 flex items-center gap-2.5">
-      <span class="h-3 w-3 rounded-sm bg-crimson"></span>
+      <img src="{import.meta.env.BASE_URL}logo.svg" alt="" class="h-8 w-8 rounded" />
       <h1 class="text-lg font-bold">Portfolio Admin</h1>
     </div>
     <p class="mb-5 text-sm text-ink-3">Sign in with your Firebase account to edit portfolio data.</p>

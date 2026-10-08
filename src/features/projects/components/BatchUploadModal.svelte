@@ -4,7 +4,6 @@
   import { formatBytes } from '@/core/utils/image';
   import Modal from '@/shared/ui/Modal.svelte';
   import Button from '@/shared/ui/Button.svelte';
-  import Input from '@/shared/ui/Input.svelte';
   import Field from '@/shared/ui/Field.svelte';
   import Spinner from '@/shared/ui/Spinner.svelte';
   import { inputClass } from '@/shared/ui/styles';
@@ -39,7 +38,9 @@
 
 <Modal {open} title="Batch upload ({files.length} images)" size="lg" onclose={() => !busy && onclose()}>
   <div class="mb-5 grid gap-4 sm:grid-cols-2">
-    <Input label="File name prefix" bind:value={gallery.namePrefix} placeholder="screenshot_" />
+    <p class="text-xs text-ink-3 sm:col-span-2">
+      Files are named automatically: <code>{gallery.cleanId}_XXXX.{extFor(format)}</code> (4 random characters).
+    </p>
     <Field label="Format">
       <select class={inputClass} bind:value={format}>
         <option value="image/webp">WebP (best)</option>
@@ -78,9 +79,7 @@
         <span class="w-8 shrink-0 text-ink-3">#{existingCount + 1 + i}</span>
         <span class="min-w-0 flex-1 truncate text-ink-2">{file.name} <span class="text-ink-3">({formatBytes(file.size)})</span></span>
         <Folder size={12} class="shrink-0 text-ink-3" />
-        <span class="hidden truncate text-ink-3 sm:inline">
-          projects/{gallery.cleanId}/<strong class="text-ink">{gallery.namePrefix}{existingCount + 1 + i}.{extFor(format)}</strong>
-        </span>
+        <span class="hidden truncate text-ink-3 sm:inline">projects/{gallery.cleanId}/{gallery.cleanId}_<strong class="text-ink">XXXX</strong>.{extFor(format)}</span>
       </div>
     {/each}
   </div>

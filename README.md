@@ -39,13 +39,22 @@ Each feature owns its page, `components/`, and a `*.svelte.ts` store or form cla
 pnpm install
 pnpm dev          # http://localhost:5173/portadmin/
 pnpm run check    # svelte-check + tsc
-pnpm build        # outputs dist/
+pnpm build        # outputs dist/ (committed)
 ```
 
 ## Deploy
 
-`.github/workflows/deploy.yml` builds on push to `main` and publishes `dist/` to the `gh-pages` branch.
-Vite `base` is `/portadmin/` (see `vite.config.ts`).
+`dist/` is committed. The workflow (`.github/workflows/deploy.yml`) runs no install or build: it only copies
+`dist/` to the `gh-pages` branch (created if missing), and only when the commit message contains `deploy`.
+
+```
+pnpm build
+git add -A
+git commit -m "deploy: <what changed>"
+git push
+```
+
+A commit without "deploy" in its message does not start the workflow. Vite `base` is `/portadmin/`.
 
 ## Firebase notes
 

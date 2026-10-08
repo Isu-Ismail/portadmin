@@ -24,7 +24,10 @@
 
     <!-- Mobile top bar + drawer -->
     <header class="flex items-center justify-between border-b border-line bg-surface px-4 py-3 md:hidden">
-      <span class="text-sm font-bold">Portfolio Admin</span>
+      <span class="flex items-center gap-2 text-sm font-bold">
+        <img src="{import.meta.env.BASE_URL}logo.svg" alt="" class="h-6 w-6 rounded" />
+        Portfolio Admin
+      </span>
       <button type="button" class="p-1 text-ink-2" onclick={() => (menuOpen = !menuOpen)} aria-label="Menu">
         <Menu size={20} />
       </button>

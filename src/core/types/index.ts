@@ -94,7 +94,6 @@ export interface ProjectData {
   narratives: NarrativeSection[];
   images: string[];
   certificate: string;
-  detailsLink?: string;
 }
 
 export type ImageFormat = 'image/webp' | 'image/jpeg' | 'image/png';

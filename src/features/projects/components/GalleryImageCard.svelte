@@ -11,14 +11,61 @@
     onmove: (dir: -1 | 1) => void;
     onremove: () => void;
     onedit: () => void;
+    dragging?: boolean;
+    dropTarget?: boolean;
+    ondragstart: () => void;
+    ondragenter: () => void;
+    ondrop: () => void;
+    ondragend: () => void;
   }
 
-  let { url, index, total, selected, ontoggle, onmove, onremove, onedit }: Props = $props();
+  let {
+    url,
+    index,
+    total,
+    selected,
+    ontoggle,
+    onmove,
+    onremove,
+    onedit,
+    dragging = false,
+    dropTarget = false,
+    ondragstart,
+    ondragenter,
+    ondrop,
+    ondragend
+  }: Props = $props();
 
   const iconBtn = 'rounded p-1 text-ink-3 hover:bg-panel hover:text-ink disabled:opacity-30 disabled:hover:bg-transparent';
 </script>
 
-<div class="overflow-hidden rounded-md border bg-bg {selected ? 'border-orange' : 'border-line'}">
+<div
+  class="cursor-grab overflow-hidden rounded-md border bg-bg {dropTarget
+    ? 'border-crimson'
+    : selected
+      ? 'border-orange'
+      : 'border-line'} {dragging ? 'opacity-40' : ''}"
+  role="listitem"
+  draggable="true"
+  ondragstart={(e) => {
+    e.dataTransfer?.setData('text/plain', String(index));
+    if (e.dataTransfer) e.dataTransfer.effectAllowed = 'move';
+    ondragstart();
+  }}
+  ondragenter={(e) => {
+    e.preventDefault();
+    ondragenter();
+  }}
+  ondragover={(e) => e.preventDefault()}
+  ondrop={(e) => {
+    // Dropped files bubble up to the gallery drop zone; only handle internal reorders here.
+    if (e.dataTransfer?.files.length) return;
+    e.preventDefault();
+    e.stopPropagation();
+    ondrop();
+  }}
+  {ondragend}
+>
   <div class="relative aspect-video bg-surface">
     <img src={url} alt="Screenshot {index + 1}" class="h-full w-full object-cover" loading="lazy" />
     <button

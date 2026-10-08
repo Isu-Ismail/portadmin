@@ -76,7 +76,11 @@
     <ProjectOverviewSection {form} />
     <CaseStudySection {form} />
     <NarrativesSection {form} />
-    <GalleryManager projectId={form.project.id} bind:images={form.project.images} />
+    <GalleryManager
+      projectId={form.project.id}
+      bind:images={form.project.images}
+      onreplace={(url) => form.queueStorageDelete(url)}
+    />
     <Card title="Verified credential / certificate">
       <ImageUploader
         bind:value={form.project.certificate}

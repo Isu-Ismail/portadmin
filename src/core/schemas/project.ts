@@ -47,6 +47,5 @@ export const ProjectDataSchema = z.object({
   architectureNodes: z.array(ArchitectureNodeItemSchema).optional().default([]),
   narratives: z.array(NarrativeSectionSchema).optional().default([]),
   images: z.array(z.string()).optional().default([]),
-  certificate: z.string().optional().default(''),
-  detailsLink: optionalUrl.default('')
+  certificate: z.string().optional().default('')
 });

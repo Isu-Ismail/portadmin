@@ -24,7 +24,7 @@
 
 <aside class="flex h-full w-full flex-col border-r border-line bg-surface md:w-60">
   <div class="flex items-center gap-2.5 border-b border-line px-5 py-4">
-    <span class="h-3 w-3 rounded-sm bg-crimson"></span>
+    <img src="{import.meta.env.BASE_URL}logo.svg" alt="" class="h-7 w-7 rounded" />
     <span class="text-sm font-bold tracking-wide">Portfolio Admin</span>
   </div>
 

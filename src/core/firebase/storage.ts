@@ -3,8 +3,7 @@ import {
   getBlob,
   getDownloadURL,
   ref,
-  uploadBytes,
-  type StorageReference
+  uploadBytes
 } from 'firebase/storage';
 import { storage } from './client';
 
@@ -68,22 +67,40 @@ export function uploadExperienceCertificate(index: number, file: File | Blob, na
 }
 
 // ---- Project assets ----
+// Every project file is named `<projectslug>_<4 random chars>.<ext>` (e.g. cgpa_A2SD.webp).
+// Names are never reused, so reordering/replacing never needs Storage renames.
 
+const SUFFIX_CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+
+function randomSuffix(): string {
+  const bytes = crypto.getRandomValues(new Uint8Array(4));
+  return Array.from(bytes, (b) => SUFFIX_CHARS[b % SUFFIX_CHARS.length]).join('');
+}
+
+/** Build a unique project file name. `taken` holds lower-cased names already in use (and is updated). */
+export function newProjectFileName(projectId: string, ext: string, taken: Set<string> = new Set()): string {
+  let name: string;
+  do {
+    name = `${cleanId(projectId)}_${randomSuffix()}.${ext}`;
+  } while (taken.has(name.toLowerCase()));
+  taken.add(name.toLowerCase());
+  return name;
+}
+
+/** Upload a project image under a fresh random name. */
 export function uploadProjectImage(
   projectId: string,
   file: File | Blob,
-  position: number,
-  name = 'image.webp',
-  customFileName?: string
+  originalName = 'image.webp',
+  taken?: Set<string>
 ) {
-  const ext = extOf(name, 'webp');
-  const fileName = customFileName ? customFileName.trim() : `${position}.${ext}`;
+  const ext = extOf(originalName, 'webp');
+  const fileName = newProjectFileName(projectId, ext, taken);
   return upload(`projects/${cleanId(projectId)}/${fileName}`, file, ext);
 }
 
 export function uploadCertificateImage(projectId: string, file: File | Blob, name = 'certificate.webp') {
-  const ext = extOf(name, 'webp');
-  return upload(`projects/${cleanId(projectId)}/certificate.${ext}`, file, ext);
+  return uploadProjectImage(projectId, file, name);
 }
 
 /** Best-effort delete of a Storage object by download URL or path. */
@@ -97,36 +114,4 @@ export async function deleteStorageFile(urlOrPath: string): Promise<void> {
   } catch (err) {
     console.warn(`Could not delete storage file (${urlOrPath}):`, err);
   }
-}
-
-/** Re-number project carousel images sequentially (1.ext, 2.ext, ...). */
-export async function renumberProjectImages(projectId: string, images: string[]): Promise<string[]> {
-  const pending: Array<{ i: number; tempRef: StorageReference; ext: string }> = [];
-
-  for (let i = 0; i < images.length; i++) {
-    let oldRef: StorageReference;
-    try {
-      oldRef = ref(storage, images[i]);
-    } catch {
-      continue;
-    }
-    const ext = oldRef.name.split('.').pop() || 'png';
-    if (oldRef.name === `${i + 1}.${ext}`) continue;
-
-    const blob = await getBlob(oldRef);
-    const tempRef = ref(storage, `projects/${projectId}/__tmp_${i}_${Date.now()}.${ext}`);
-    await uploadBytes(tempRef, blob);
-    await deleteObject(oldRef);
-    pending.push({ i, tempRef, ext });
-  }
-
-  const result = [...images];
-  for (const { i, tempRef, ext } of pending) {
-    const blob = await getBlob(tempRef);
-    const finalRef = ref(storage, `projects/${projectId}/${i + 1}.${ext}`);
-    await uploadBytes(finalRef, blob);
-    await deleteObject(tempRef);
-    result[i] = await getDownloadURL(finalRef);
-  }
-  return result;
 }

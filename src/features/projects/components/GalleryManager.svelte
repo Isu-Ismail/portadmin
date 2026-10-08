@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Plus, RefreshCw, Trash2, Upload } from '@lucide/svelte';
+  import { Plus, Trash2, Upload, Zap } from '@lucide/svelte';
   import type { ProcessedImageResult } from '@/core/types';
   import { toast } from '@/core/utils/toast.svelte';
   import Button from '@/shared/ui/Button.svelte';
@@ -8,22 +8,36 @@
   import ImageResizerModal from '@/shared/image/ImageResizerModal.svelte';
   import { GalleryController } from '../gallery.svelte';
   import BatchUploadModal from './BatchUploadModal.svelte';
+  import OptimizeWebpModal from './OptimizeWebpModal.svelte';
   import GalleryImageCard from './GalleryImageCard.svelte';
 
-  let { projectId, images = $bindable([]) }: { projectId: string; images: string[] } = $props();
+  let {
+    projectId,
+    images = $bindable([]),
+    onreplace
+  }: { projectId: string; images: string[]; onreplace?: (url: string) => void } = $props();
 
   const gallery = new GalleryController({
     projectId: () => projectId,
     get: () => images,
-    set: (v) => (images = v)
+    set: (v) => (images = v),
+    onReplaced: (url) => onreplace?.(url)
   });
 
   let dragging = $state(false);
+  let dragFrom = $state<number | null>(null);
+  let dragOver = $state<number | null>(null);
+
+  function dropOn(to: number) {
+    if (dragFrom !== null) gallery.reorder(dragFrom, to);
+    dragFrom = dragOver = null;
+  }
   let resizerOpen = $state(false);
   let targetIdx = $state<number | null>(null);
   let singleFile = $state<File | null>(null);
   let batchOpen = $state(false);
   let batchFiles = $state<File[]>([]);
+  let optimizeOpen = $state(false);
 
   function pick(files: File[]) {
     const imgs = files.filter((f) => f.type.startsWith('image/'));
@@ -61,14 +75,13 @@
     targetIdx = null;
   }
 
-  const slot = $derived(targetIdx !== null ? targetIdx + 1 : images.length + 1);
 </script>
 
-<Card title="Screenshots & carousel" description="Stored in projects/{gallery.cleanId}/">
+<Card title="Screenshots & carousel" description="Drag cards to reorder. Order is saved to Firestore only; Storage files are never renamed.">
   {#snippet actions()}
-    {#if images.length > 1}
-      <Button size="sm" onclick={() => gallery.renumber()} disabled={gallery.renumbering} title="Rename Storage files to 1, 2, 3 order">
-        <RefreshCw size={13} class={gallery.renumbering ? 'animate-spin' : ''} /> Renumber
+    {#if gallery.nonWebpIndices.length}
+      <Button size="sm" onclick={() => (optimizeOpen = true)} title="Convert non-WebP images to WebP">
+        <Zap size={13} /> Optimize to WebP ({gallery.nonWebpIndices.length})
       </Button>
     {/if}
     <label
@@ -153,6 +166,12 @@
             onmove={(dir) => gallery.move(i, dir)}
             onremove={() => gallery.remove(i)}
             onedit={() => editExisting(i)}
+            dragging={dragFrom === i}
+            dropTarget={dragOver === i && dragFrom !== null && dragFrom !== i}
+            ondragstart={() => (dragFrom = i)}
+            ondragenter={() => (dragOver = i)}
+            ondrop={() => dropOn(i)}
+            ondragend={() => (dragFrom = dragOver = null)}
           />
         {/each}
       </div>
@@ -163,7 +182,7 @@
 <ImageResizerModal
   open={resizerOpen}
   imageFile={singleFile || (targetIdx !== null ? images[targetIdx] : null)}
-  initialFileName="{gallery.namePrefix}{slot}.webp"
+  initialFileName="{gallery.cleanId}.webp"
   onapply={applyEdited}
   onapplyOriginal={singleFile ? applyOriginal : undefined}
   oncancel={() => (resizerOpen = false)}
@@ -176,3 +195,5 @@
   existingCount={images.length}
   onclose={() => ((batchOpen = false), (batchFiles = []))}
 />
+
+<OptimizeWebpModal open={optimizeOpen} {images} {gallery} onclose={() => (optimizeOpen = false)} />

@@ -1,41 +1,36 @@
-name: Deploy Portfolio Admin CMS to GitHub Pages
+name: Deploy
+
+# Publishes the committed dist/ folder to the gh-pages branch. No install, no build.
+# Runs only when the pushed commit message contains the word "deploy".
+# Flow: pnpm build  ->  git add -A  ->  git commit -m "deploy: ..."  ->  git push
 
 on:
   push:
-    branches:
-      - main
-  workflow_dispatch:
+    branches: [main]
 
 permissions:
   contents: write
 
 jobs:
-  build-and-deploy:
+  publish:
+    if: contains(github.event.head_commit.message, 'deploy')
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Source Code
+      - name: Fetch only dist/
         uses: actions/checkout@v4
-
-      - name: Install pnpm Package Manager
-        uses: pnpm/action-setup@v4
         with:
-          version: 11
+          fetch-depth: 1
+          sparse-checkout: dist
+          sparse-checkout-cone-mode: false
 
-      - name: Set up Node.js Environment
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: 'pnpm'
-
-      - name: Install Dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Build Production Static Bundle
-        run: pnpm run build
-
-      - name: Deploy to GitHub Pages
-        uses: JamesIves/github-pages-deploy-action@v4
-        with:
-          folder: dist
-          branch: gh-pages
-          clean: true
+      - name: Push dist/ to gh-pages (branch is created if missing)
+        run: |
+          test -f dist/index.html || { echo "dist/ is missing or empty. Run 'pnpm build' and commit dist/."; exit 1; }
+          cd dist
+          touch .nojekyll
+          git init -q -b gh-pages
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -q -m "deploy ${GITHUB_SHA::7}"
+          git push -f "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" gh-pages
