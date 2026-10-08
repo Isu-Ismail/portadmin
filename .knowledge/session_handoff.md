@@ -15,6 +15,10 @@ Full rewrite from SvelteKit to plain Svelte 5 + Vite + Tailwind v4 + hash router
 - Skeleton loaders (`Skeleton`, `FormSkeleton`, `ProjectCardSkeleton`) on About, Projects and project edit pages.
 - Section components bind through a local alias (`const data = $derived(form.data)`) to avoid Svelte's
   `ownership_invalid_binding` dev warning. Keep this pattern for new sections.
+- Skill Cards feature: Skill categories are managed as separate cards in `SkillsSection.svelte` with `ListEditor`
+  (each card has a title and a dedicated `TagInput` for its skills). `data.skills` is automatically kept in sync
+  as a flattened array of all card items on save for backward compatibility.
+- About form section order: `SkillsSection` is positioned directly above `ContactSection` in `AboutPage.svelte`.
 - Old SvelteKit code is in `archive/` (config files renamed `*.archived`).
 
 ## Firebase config (live)

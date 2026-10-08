@@ -28,7 +28,11 @@ export class AboutForm {
           ...doc,
           images: { ...defaultAboutData.images, ...(doc.images || {}) },
           contact: { ...defaultAboutData.contact, ...(doc.contact || {}) },
-          stats: doc.stats?.length ? doc.stats : defaultAboutData.stats
+          stats: doc.stats?.length ? doc.stats : defaultAboutData.stats,
+          skillCards:
+            doc.skillCards && Array.isArray(doc.skillCards) && doc.skillCards.length
+              ? doc.skillCards
+              : defaultAboutData.skillCards
         };
         aboutStore.set(doc);
       }
@@ -60,6 +64,9 @@ export class AboutForm {
   };
 
   async save(): Promise<void> {
+    if (this.data.skillCards && this.data.skillCards.length > 0) {
+      this.data.skills = this.data.skillCards.flatMap((c) => c.items || []);
+    }
     const res = validateWithSchema(AboutDataSchema, this.data);
     if (!res.success) {
       this.errors = res.errors;

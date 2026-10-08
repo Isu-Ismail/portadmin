@@ -42,6 +42,11 @@ export const ProfileImagesSchema = z.object({
   resume_image: z.string().default('')
 });
 
+export const SkillCardItemSchema = z.object({
+  title: z.string().trim().min(1, 'Card title is required'),
+  items: z.array(z.string().trim()).default([])
+});
+
 export const AboutDataSchema = z.object({
   name: z.string().trim().min(1, 'Full name is required (at least 1 character)'),
   role: z.string().trim().min(1, 'Primary title / role is required'),
@@ -58,6 +63,7 @@ export const AboutDataSchema = z.object({
     instagram: ''
   }),
   skills: z.array(z.string().trim()).default([]),
+  skillCards: z.array(SkillCardItemSchema).default([]),
   interests: z.array(z.string().trim()).default([]),
   education: z.array(EducationItemSchema).default([]),
   experience: z.array(ExperienceItemSchema).default([]),

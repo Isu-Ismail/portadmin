@@ -43,8 +43,8 @@
     <IdentitySection {form} />
     <StatsSection {form} />
     <ProfileSection {form} />
-    <ContactSection {form} />
     <SkillsSection {form} />
+    <ContactSection {form} />
     <EducationSection {form} />
     <ExperienceSection {form} />
     <CertificatesSection {form} />

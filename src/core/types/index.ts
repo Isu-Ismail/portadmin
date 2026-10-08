@@ -39,6 +39,11 @@ export interface StatCardItem {
   label: string;
 }
 
+export interface SkillCardItem {
+  title: string;
+  items: string[];
+}
+
 export interface AboutData {
   name: string;
   role: string;
@@ -48,6 +53,7 @@ export interface AboutData {
   images: ProfileImages;
   contact: ContactInfo;
   skills: string[];
+  skillCards: SkillCardItem[];
   interests: string[];
   education: EducationItem[];
   experience: ExperienceItem[];
