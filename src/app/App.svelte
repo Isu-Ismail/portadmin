@@ -4,6 +4,7 @@
   import { authState } from '@/core/firebase/auth.svelte';
   import LoginPage from '@/features/auth/LoginPage.svelte';
   import Spinner from '@/shared/ui/Spinner.svelte';
+  import FormSkeleton from '@/shared/ui/FormSkeleton.svelte';
   import Toasts from '@/shared/ui/Toasts.svelte';
   import Sidebar from './Sidebar.svelte';
   import { routes } from './routes';
@@ -12,7 +13,20 @@
 </script>
 
 {#if authState.loading}
-  <div class="flex min-h-screen items-center justify-center"><Spinner size={28} /></div>
+  {#if authState.isKnownUser}
+    <div class="min-h-screen md:flex">
+      <div class="sticky top-0 hidden h-screen shrink-0 md:block">
+        <Sidebar />
+      </div>
+      <main class="min-w-0 flex-1 px-4 py-6 md:px-8">
+        <div class="mx-auto max-w-5xl">
+          <FormSkeleton cards={4} />
+        </div>
+      </main>
+    </div>
+  {:else}
+    <div class="flex min-h-screen items-center justify-center"><Spinner size={28} /></div>
+  {/if}
 {:else if !authState.user}
   <LoginPage />
 {:else}

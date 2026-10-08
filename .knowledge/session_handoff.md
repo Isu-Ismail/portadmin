@@ -18,7 +18,11 @@ Full rewrite from SvelteKit to plain Svelte 5 + Vite + Tailwind v4 + hash router
 - Skill Cards feature: Skill categories are managed as separate cards in `SkillsSection.svelte` with `ListEditor`
   (each card has a title and a dedicated `TagInput` for its skills). `data.skills` is automatically kept in sync
   as a flattened array of all card items on save for backward compatibility.
-- About form section order: `SkillsSection` is positioned directly above `ContactSection` in `AboutPage.svelte`.
+- Instant skeleton mount: eliminated empty screen during app mount and route transitions.
+  `index.html` has a pre-mount skeleton shell matching theme colors; `App.svelte` renders
+  the sidebar and `FormSkeleton` immediately during `authState.loading` for known users;
+  and `routes.ts` configures `loadingComponent: FormSkeleton` on all lazy-loaded routes so
+  the skeleton displays without any blank gap while downloading route chunks.
 - Old SvelteKit code is in `archive/` (config files renamed `*.archived`).
 
 ## Firebase config (live)
