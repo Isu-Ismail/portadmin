@@ -4,6 +4,7 @@ export const defaultAboutData: AboutData = {
   name: "A.M. Ismail",
   role: "System Architect & Engineer",
   resume: "./assets/resume_ismail.pdf",
+  resumes: [],
   images: {
     profile: "./assets/me.jpeg",
     hero: "./assets/hero.jpeg",

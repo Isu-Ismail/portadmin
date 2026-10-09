@@ -44,12 +44,22 @@ export interface SkillCardItem {
   items: string[];
 }
 
+export interface ResumeVersion {
+  id: string;
+  name: string;
+  pdfUrl: string;
+  imageUrl: string;
+  uploadedAt: string;
+  isActive: boolean;
+}
+
 export interface AboutData {
   name: string;
   role: string;
   about: string;
   hero_about: string;
   resume: string;
+  resumes?: ResumeVersion[];
   images: ProfileImages;
   contact: ContactInfo;
   skills: string[];

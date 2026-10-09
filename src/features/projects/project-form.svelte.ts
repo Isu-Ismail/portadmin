@@ -1,5 +1,5 @@
 import { deleteProject, getProject, saveProject } from '@/core/firebase/firestore';
-import { deleteStorageFile, uploadCertificateImage } from '@/core/firebase/storage';
+import { deleteStorageFile, storagePathFromUrl, uploadCertificateImage } from '@/core/firebase/storage';
 import { ProjectDataSchema } from '@/core/schemas/project';
 import type { ProjectData } from '@/core/types';
 import { toast } from '@/core/utils/toast.svelte';
@@ -102,7 +102,20 @@ export class ProjectForm {
     this.errors = {};
     this.saving = true;
     try {
-      const toDelete = this.pendingDeletes.splice(0);
+      const activePaths = new Set<string>();
+      const add = (u: string | null | undefined) => {
+        const p = storagePathFromUrl(u);
+        if (p) activePaths.add(p);
+      };
+      add(this.project.certificate);
+      for (const img of this.project.images || []) add(img);
+
+      const toDelete = this.pendingDeletes
+        .splice(0)
+        .filter((u) => {
+          const path = storagePathFromUrl(u);
+          return Boolean(path && !activePaths.has(path));
+        });
       await Promise.all(toDelete.map((u) => deleteStorageFile(u)));
       const saved = res.data as ProjectData;
       await saveProject(saved.id, saved);

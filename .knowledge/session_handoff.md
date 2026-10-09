@@ -18,11 +18,28 @@ Full rewrite from SvelteKit to plain Svelte 5 + Vite + Tailwind v4 + hash router
 - Skill Cards feature: Skill categories are managed as separate cards in `SkillsSection.svelte` with `ListEditor`
   (each card has a title and a dedicated `TagInput` for its skills). `data.skills` is automatically kept in sync
   as a flattened array of all card items on save for backward compatibility.
-- Instant skeleton mount: eliminated empty screen during app mount and route transitions.
-  `index.html` has a pre-mount skeleton shell matching theme colors; `App.svelte` renders
-  the sidebar and `FormSkeleton` immediately during `authState.loading` for known users;
-  and `routes.ts` configures `loadingComponent: FormSkeleton` on all lazy-loaded routes so
-  the skeleton displays without any blank gap while downloading route chunks.
+- Instant Static Chrome & Scoped Data Skeletons: Static UI elements (the sidebar navigation,
+  page titles like "About Me" / "Projects", action buttons like "Fields", "Reload", "Defaults",
+  "Save & publish", "New project", "From JSON", "Refresh", and search filters) render
+  instantaneously without flashing fake skeleton boxes.
+  - `routes.ts` imports page components directly instead of lazy `wrap({ loadingComponent: FormSkeleton })`,
+    eliminating route chunk network delay and whole-page skeleton flash.
+  - `App.svelte` mounts the layout shell with `<Sidebar />` and `<Router {routes} />` immediately
+    for known users so the active page header and buttons appear on frame 0.
+  - `index.html` renders the clean static sidebar shell with real branding and no fake gray skeleton rectangles.
+  - Skeletons (`FormSkeleton`, `ProjectCardSkeleton`) are now strictly scoped to in-flight dynamic data
+    sections (form cards, project cards grid) beneath the static headers.
+- Resume Pairs & Version History: Implemented dedicated `ResumeSection.svelte` for uploading
+  paired PDF and preview image files together (`about/resume_pdf_<uid>.pdf` and
+  `about/resume_image_<uid>.webp`) sharing the same random UID. Automatically compresses image to
+  WebP (1600px max, 0.85 quality). Displays list of available versions with thumbnail, PDF link,
+  date, and interactive "Active" / "Set Active" toggle. Seamlessly updates `data.resume` and
+  `data.images.resume_image` for 100% backward compatibility with `port`.
+- Storage self-deletion protection: prevented in-place overwritten assets (like deterministic
+  `about/resume_image.webp`, `about/profile.webp`, `about/certificate*.webp`) from being deleted
+  on form save. `AboutForm.save()` and `ProjectForm.save()` now filter `pendingDeletes` against
+  active storage paths currently referenced in the form (`getActiveStoragePaths`), so re-uploaded
+  files sharing the same storage path are never deleted.
 - Old SvelteKit code is in `archive/` (config files renamed `*.archived`).
 
 ## Firebase config (live)

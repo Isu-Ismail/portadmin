@@ -10,6 +10,7 @@
   import IdentitySection from './components/IdentitySection.svelte';
   import StatsSection from './components/StatsSection.svelte';
   import ProfileSection from './components/ProfileSection.svelte';
+  import ResumeSection from './components/ResumeSection.svelte';
   import ContactSection from './components/ContactSection.svelte';
   import SkillsSection from './components/SkillsSection.svelte';
   import EducationSection from './components/EducationSection.svelte';
@@ -43,6 +44,7 @@
     <IdentitySection {form} />
     <StatsSection {form} />
     <ProfileSection {form} />
+    <ResumeSection {form} />
     <SkillsSection {form} />
     <ContactSection {form} />
     <EducationSection {form} />

@@ -34,12 +34,45 @@ export function isFirebaseStorageUrl(url: string): boolean {
   return url.includes('firebasestorage.googleapis.com') || url.startsWith('gs://');
 }
 
+/** Extract the decoded object path (e.g. 'about/resume_image.webp') from a storage URL or path. */
+export function storagePathFromUrl(urlOrPath: string | null | undefined): string {
+  if (!urlOrPath) return '';
+  if (!urlOrPath.includes('firebasestorage.googleapis.com')) {
+    return urlOrPath.trim();
+  }
+  try {
+    const afterO = urlOrPath.split('/o/')[1];
+    if (!afterO) return '';
+    return decodeURIComponent(afterO.split('?')[0]);
+  } catch {
+    return urlOrPath;
+  }
+}
+
 /** Download via SDK; plain fetch() of a download URL can hit CORS errors. */
 export async function downloadStorageBlob(urlOrPath: string): Promise<Blob> {
   return getBlob(ref(storage, urlOrPath));
 }
 
 // ---- About assets (clean, deterministic names) ----
+
+export function randomUid(length = 8): string {
+  const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
+  const bytes = crypto.getRandomValues(new Uint8Array(length));
+  return Array.from(bytes, (b) => chars[b % chars.length]).join('');
+}
+
+export async function uploadResumePair(
+  uid: string,
+  pdfFile: File | Blob,
+  imageBlob: File | Blob
+): Promise<{ pdfUrl: string; imageUrl: string }> {
+  const [pdfUrl, imageUrl] = await Promise.all([
+    upload(`about/resume_pdf_${uid}.pdf`, pdfFile, 'pdf'),
+    upload(`about/resume_image_${uid}.webp`, imageBlob, 'webp')
+  ]);
+  return { pdfUrl, imageUrl };
+}
 
 export function uploadResumePdf(file: File | Blob, name = 'resume_pdf.pdf') {
   const ext = extOf(name, 'pdf');

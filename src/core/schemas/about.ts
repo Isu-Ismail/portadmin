@@ -47,12 +47,22 @@ export const SkillCardItemSchema = z.object({
   items: z.array(z.string().trim()).default([])
 });
 
+export const ResumeVersionSchema = z.object({
+  id: z.string(),
+  name: z.string().default(''),
+  pdfUrl: z.string().default(''),
+  imageUrl: z.string().default(''),
+  uploadedAt: z.string().default(''),
+  isActive: z.boolean().default(false)
+});
+
 export const AboutDataSchema = z.object({
   name: z.string().trim().min(1, 'Full name is required (at least 1 character)'),
   role: z.string().trim().min(1, 'Primary title / role is required'),
   about: z.string().trim().default(''),
   hero_about: z.string().trim().default(''),
   resume: z.string().default(''),
+  resumes: z.array(ResumeVersionSchema).default([]),
   images: ProfileImagesSchema.default({ profile: '', hero: '', resume_image: '' }),
   contact: ContactInfoSchema.default({
     email: '',
